@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>折扣碼生成器 - powered by StreetVoice</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+</head>
+<body>
+    <div class="theme-toggle" id="themeToggle">🌙 深色模式</div>
+    <div class="container">
+        <div class="header">
+            <h1>折扣碼生成器</h1>
+            <div class="subtitle">快速生成大量優惠券代碼</div>
+        </div>
+
+        <div class="notice">
+            <div class="notice-icon">🔐</div>
+            <div class="notice-text">
+                請放心！我們不會儲存你生成的折扣碼，<br>
+                所有代碼都在本地生成且只存在於你的瀏覽器中。
+            </div>
+        </div>
+
+        <div class="form-section">
+            <form id="generatorForm">
+                <div class="form-group count-group">
+                    <label for="count">生成數量（最多 100,000 筆）</label>
+                    <input type="number" id="count" class="form-control count-input" value="8" min="1" max="100000" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="codeLength">代碼長度（4-20 字元）</label>
+                    <input type="number" id="codeLength" class="form-control" value="8" min="4" max="20" required>
+                </div>
+
+                <div class="code-composition">
+                    <div class="composition-title">代碼內容組成</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="letterCount">英文字母數量</label>
+                            <input type="number" id="letterCount" class="form-control" min="0" max="20" placeholder="0 = 自動分配">
+                        </div>
+                        <div class="form-group">
+                            <label for="digitCount">數字數量</label>
+                            <input type="number" id="digitCount" class="form-control" min="0" max="20" placeholder="0 = 自動分配">
+                        </div>
+                    </div>
+                    <div style="font-size: 0.85rem; color: #888; margin-top: 8px;">
+                        留空或設為0會自動分配。英文+數字總數不能超過代碼長度。
+                    </div>
+
+                    <div class="collapsible-section">
+                        <div class="collapsible-header" id="advancedToggle">
+                            <span class="collapsible-title">進階設定</span>
+                            <span class="collapsible-icon">▼</span>
+                        </div>
+                        <div class="collapsible-content" id="advancedContent">
+                            <div class="form-group">
+                                <label for="letterCase">英文字母大小寫</label>
+                                <select id="letterCase" class="form-control">
+                                    <option value="uppercase">全部大寫</option>
+                                    <option value="lowercase">全部小寫</option>
+                                    <option value="mixed">大小寫混合</option>
+                                </select>
+                                <div style="font-size: 0.85rem; color: #888; margin-top: 5px;">
+                                    僅影響自動生成部分，不影響前後綴
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="prefix">前綴</label>
+                                    <input type="text" id="prefix" class="form-control" placeholder="例如: SALE" maxlength="10">
+                                </div>
+                                <div class="form-group">
+                                    <label for="suffix">後綴</label>
+                                    <input type="text" id="suffix" class="form-control" placeholder="例如: 2024" maxlength="10">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 即時預覽格式組成 -->
+                <div class="format-preview" id="formatPreview">
+                    <div class="preview-title">預覽格式</div>
+                    <div class="preview-content" id="previewContent">
+                        大寫英文字及數字 共8碼
+                    </div>
+                </div>
+
+                <button type="submit" class="btn" id="generateBtn">
+                    <span class="btn-text">開始生成</span>
+                </button>
+            </form>
+        </div>
+
+        <div id="progressSection" class="progress-section">
+            <div class="progress-header">
+                <div class="progress-title">正在生成折扣碼...</div>
+            </div>
+            
+            <div class="progress-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="progressPercent">0%</div>
+                    <div class="stat-label">完成進度</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="completedCount">0</div>
+                    <div class="stat-label">已完成</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="estimatedTime">--</div>
+                    <div class="stat-label">預估剩餘時間（秒）</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="currentBatch">0</div>
+                    <div class="stat-label">當前批次</div>
+                </div>
+            </div>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+            </div>
+            
+            <div class="progress-text" id="progressText">準備開始...</div>
+        </div>
+
+        <div id="resultsSection" class="results-section">
+            <div class="results-header">
+                <div class="results-title">生成完成！</div>
+                <button class="download-btn" id="downloadBtn">下載為 CSV</button>
+            </div>
+            <div id="codesContainer" class="codes-container"></div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; <span id="currentYear">2024</span> 折扣碼生成器 · powered by <a href="https://streetvoice.com" target="_blank">StreetVoice</a></p>
+            <p class="footer-note">所有功能均在瀏覽器端執行，確保您的資料安全。</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
