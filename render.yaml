@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: sv-coupon-gen
+    env: python
+    region: singapore
+    plan: free
+    buildCommand: "./deploy.sh"
+    startCommand: "python3 app.py"
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: FLASK_APP
+        value: app.py
+      - key: PYTHONUNBUFFERED
+        value: "1"
+    scaling:
+      minInstances: 1
+      maxInstances: 1

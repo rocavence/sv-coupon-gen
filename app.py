@@ -151,6 +151,16 @@ class DiscountCodeGenerator:
 def index():
     return render_template('index.html')
 
+@app.route('/health')
+def health_check():
+    """健康檢查端點 - Health check endpoint for monitoring"""
+    return {
+        'status': 'healthy',
+        'service': '街聲折扣碼生成器',
+        'version': '1.0.0',
+        'timestamp': datetime.now().isoformat()
+    }
+
 @app.route('/generate', methods=['POST'])
 def generate_codes():
     try:
@@ -253,4 +263,15 @@ def handle_start_generation(data):
         emit('error', {'message': str(e)})
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, host='0.0.0.0', port=8000, allow_unsafe_werkzeug=True)
+    import os
+    
+    # 從環境變數取得設定，Render 會自動提供 PORT
+    port = int(os.environ.get('PORT', 8000))
+    debug = os.environ.get('FLASK_ENV') != 'production'
+    
+    print(f"🚀 啟動街聲折扣碼生成器...")
+    print(f"   Port: {port}")
+    print(f"   Debug: {debug}")
+    print(f"   Environment: {os.environ.get('FLASK_ENV', 'development')}")
+    
+    socketio.run(app, debug=debug, host='0.0.0.0', port=port, allow_unsafe_werkzeug=True)
