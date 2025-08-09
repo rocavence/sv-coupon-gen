@@ -329,11 +329,26 @@ body.light-theme .code-item {
     cursor: pointer;
     font-size: 0.9rem;
     font-weight: 600;
-    transition: all 0.3s ease;
+    transition: transform 0.15s linear;
+    position: relative;
+    outline: none;
+    user-select: none;
+}
+
+@keyframes squashBounce {
+    0%   { transform: var(--start-transform, scale(1,1)) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    25%  { transform: var(--squash-transform) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    50%  { transform: var(--stretch-transform) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    70%  { transform: scale(1.05, 0.97) rotate(var(--angle, 0deg)) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    85%  { transform: scale(0.98, 1.02) rotate(var(--angle, 0deg)) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    100% { transform: scale(1,1) rotate(0deg) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+}
+
+.animate-squash {
+    animation: squashBounce 0.49s ease-out;
 }
 
 .download-btn:hover {
-    transform: translateY(-1px);
     box-shadow: 0 4px 15px rgba(107, 207, 127, 0.4);
 }
 

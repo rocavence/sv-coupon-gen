@@ -172,6 +172,99 @@ function displayResults(codes, totalTime) {
     resultsSection.classList.add('show');
 }
 
+// 下載按鈕 Q 彈動畫效果
+let downloadPressStartTime = 0;
+
+function triggerDownloadBounce(e, force) {
+    const rect = downloadBtn.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+
+    const dx = clientX - centerX;
+    const dy = clientY - centerY;
+
+    // 限制旋轉角度
+    let rawAngle = Math.atan2(dy, dx) * (180 / Math.PI);
+    if (rawAngle > 100) rawAngle = 100;
+    if (rawAngle < -100) rawAngle = -100;
+    downloadBtn.style.setProperty('--angle', `${rawAngle}deg`);
+
+    // 力道影響壓縮比例
+    const squashX = 1 + 0.15 * force;
+    const squashY = 1 - 0.15 * force;
+    const stretchX = 1 - 0.08 * force;
+    const stretchY = 1 + 0.08 * force;
+
+    downloadBtn.style.setProperty('--squash-transform', `scale(${squashX}, ${squashY}) rotate(${rawAngle}deg)`);
+    downloadBtn.style.setProperty('--stretch-transform', `scale(${stretchX}, ${stretchY}) rotate(${rawAngle}deg)`);
+
+    downloadBtn.classList.remove('animate-squash');
+    void downloadBtn.offsetWidth;
+    downloadBtn.classList.add('animate-squash');
+}
+
+// 滑鼠力道模擬
+downloadBtn.addEventListener('mousedown', () => {
+    downloadPressStartTime = Date.now();
+});
+
+downloadBtn.addEventListener('mouseup', (e) => {
+    const duration = Date.now() - downloadPressStartTime;
+    const fakeForce = Math.min(1, duration / 500);
+    triggerDownloadBounce(e, fakeForce);
+});
+
+// 觸控力道
+downloadBtn.addEventListener('touchstart', () => {
+    downloadPressStartTime = Date.now();
+});
+
+downloadBtn.addEventListener('touchend', (e) => {
+    const touch = e.changedTouches[0];
+    let force = 0;
+    if (touch.force !== undefined && touch.force > 0) {
+        force = Math.min(1, touch.force);
+    } else {
+        const duration = Date.now() - downloadPressStartTime;
+        force = Math.min(1, duration / 500);
+    }
+    triggerDownloadBounce(e, force);
+});
+
+// 滑鼠靠近閃避效果
+document.addEventListener('mousemove', (e) => {
+    if (!downloadBtn || !resultsSection.classList.contains('show')) return;
+    
+    const rect = downloadBtn.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const dx = e.clientX - centerX;
+    const dy = e.clientY - centerY;
+
+    const distance = Math.sqrt(dx*dx + dy*dy);
+    const radius = 120; // 感應範圍
+    const maxOffset = 20; // 最大位移 px
+
+    if (distance < radius) {
+        // 計算反方向位移
+        const factor = (radius - distance) / radius; // 越近位移越大
+        const offsetX = Math.min(maxOffset, dx * factor * 0.5) * -1;
+        const offsetY = Math.min(maxOffset, dy * factor * 0.5) * -1;
+
+        downloadBtn.style.setProperty('--offset-x', `${offsetX}px`);
+        downloadBtn.style.setProperty('--offset-y', `${offsetY}px`);
+        downloadBtn.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+    } else {
+        // 回到原位
+        downloadBtn.style.setProperty('--offset-x', `0px`);
+        downloadBtn.style.setProperty('--offset-y', `0px`);
+        downloadBtn.style.transform = `translate(0px, 0px)`;
+    }
+});
+
 // 下載功能
 downloadBtn.addEventListener('click', () => {
     if (generatedCodes.length === 0) return;
