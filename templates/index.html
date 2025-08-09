@@ -1,24 +1,48 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
+    <!-- 技術相關 Meta 標籤 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專屬碼產生器 - powered by StreetVoice</title>
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <meta name="description" content="快速產生大量專屬碼，支援自訂前後綴、字母數字組合，所有專屬碼本地產生確保隱私安全。">
-    <meta name="keywords" content="專屬碼,優惠券,專屬碼產生器,批量產生,本地產生">
-    <meta property="og:title" content="專屬碼產生器 - powered by StreetVoice">
-    <meta property="og:description" content="快速產生大量專屬碼，支援自訂前後綴、字母數字組合，所有專屬碼本地產生確保隱私安全。">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="StreetVoice 街聲">
+    <meta name="language" content="zh-TW">
+    
+    <!-- 基本 Meta 標籤 -->
+    <title>專屬碼產生器 | 免費線上工具</title>
+    <meta name="description" content="100% 免費專屬碼產生器！一次產生最多10萬組優惠碼、折扣碼、專屬碼，支援自訂長度、前後綴設定。所有代碼在瀏覽器本地產生，安全可靠，立即下載 CSV 檔案。powered by StreetVoice 街聲">
+    <meta name="keywords" content="促銷碼產生器,優惠碼產生器,折扣碼產生器,專屬碼產生,免費代碼工具,批量產生,CSV下載,電商促銷工具,購物優惠碼">
+
+    <!-- Open Graph 標籤 (Facebook, LINE 等社交媒體) -->
+    <meta property="og:title" content="專屬碼產生器 | 免費線上工具">
+    <meta property="og:description" content="100% 免費！快速產生大量專屬碼、優惠碼、折扣碼，支援自訂設定，本地執行更安全。電商必備工具，立即免費使用！powered by StreetVoice 街聲">
     <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sv-coupon-gen.onrender.com/">
+    <meta property="og:site_name" content="StreetVoice 街聲免費工具">
+
+    <!-- Twitter 卡片標籤 -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="專屬碼產生器 | 免費線上工具">
+    <meta name="twitter:description" content="100% 免費！快速產生大量專屬碼、優惠碼、折扣碼，電商必備工具。powered by StreetVoice 街聲">
+    
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
 </head>
 <body>
-    <div class="theme-toggle" id="themeToggle">🌙 深色模式</div>
+    <div class="top-controls">
+        <div class="theme-toggle" id="themeToggle">🌙 深色模式</div>
+        <div class="language-switch" id="languageSwitch">
+            <span class="lang-option active" data-lang="zh">中文</span>
+            <span class="lang-option" data-lang="en">ENG</span>
+        </div>
+    </div>
     <div class="container">
         <div class="header">
-            <h1>專屬碼產生器</h1>
-            <div class="subtitle">快速產生大量專屬碼</div>
+            <div class="header-content">
+                <h1>專屬碼產生器</h1>
+                <div class="subtitle">快速產生大量專屬碼</div>
+            </div>
         </div>
 
         <div class="notice">
@@ -103,6 +127,8 @@
             </form>
         </div>
 
+        <div id="alertContainer" class="alert-container"></div>
+
         <div id="progressSection" class="progress-section">
             <div class="progress-header">
                 <div class="progress-title">正在產生專屬碼...</div>
@@ -137,11 +163,11 @@
         <div id="resultsSection" class="results-section">
             <div class="results-header">
                 <div class="results-title">產生完成！</div>
-                <button class="download-btn" id="downloadBtn">下載為 CSV</button>
             </div>
             <div id="codesContainer" class="codes-container"></div>
             <div class="results-footer">
                 <button class="restart-btn" id="restartBtn" onclick="location.reload()">重新來過</button>
+                <button class="download-btn" id="downloadBtn">下載完整 .CSV</button>
             </div>
         </div>
 
