@@ -12,7 +12,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-# 全域變數來追蹤生成任務
+# 全域變數來追蹤產生任務
 generation_tasks = {}
 
 class DiscountCodeGenerator:
@@ -27,7 +27,7 @@ class DiscountCodeGenerator:
         self.batch_size = 1000  # 每批處理1000筆
         
     def generate_single_code(self):
-        """生成單一折扣碼"""
+        """產生單一專屬碼"""
         # 計算前後綴長度
         affix_total_length = len(self.prefix) + len(self.suffix)
         actual_code_length = self.code_length - affix_total_length
@@ -52,7 +52,7 @@ class DiscountCodeGenerator:
             letter_count = self.letter_count
             digit_count = self.digit_count
             
-            # 如果指定的總數小於實際代碼長度，剩餘部分隨機分配
+            # 如果指定的總數小於實際專屬碼長度，剩餘部分隨機分配
             remaining = actual_code_length - letter_count - digit_count
             if remaining > 0:
                 # 隨機分配剩餘字元
@@ -61,7 +61,7 @@ class DiscountCodeGenerator:
                 letter_count += extra_letters
                 digit_count += extra_digits
             
-            # 生成指定數量的字母和數字
+            # 產生指定數量的字母和數字
             code_chars = []
             code_chars.extend(random.choices(letters, k=letter_count))
             code_chars.extend(random.choices(digits, k=digit_count))
@@ -83,7 +83,7 @@ class DiscountCodeGenerator:
         return result
     
     def generate_batch(self, task_id, socket_session):
-        """批量生成折扣碼"""
+        """批量產生專屬碼"""
         codes = []
         start_time = time.time()
         
@@ -94,7 +94,7 @@ class DiscountCodeGenerator:
             batch_end = min((batch_num + 1) * self.batch_size, self.count)
             batch_size_actual = batch_end - batch_start
             
-            # 生成當前批次
+            # 產生當前批次
             batch_codes = []
             for _ in range(batch_size_actual):
                 code = self.generate_single_code()
@@ -156,7 +156,7 @@ def health_check():
     """健康檢查端點 - Health check endpoint for monitoring"""
     return {
         'status': 'healthy',
-        'service': '街聲折扣碼生成器',
+        'service': '街聲專屬碼產生器',
         'version': '1.0.0',
         'timestamp': datetime.now().isoformat()
     }
@@ -176,10 +176,10 @@ def generate_codes():
         
         # 驗證輸入
         if count <= 0 or count > 100000:
-            return jsonify({'error': '代碼數量必須在 1 到 100,000 之間'}), 400
+            return jsonify({'error': '專屬碼數量必須在 1 到 100,000 之間'}), 400
         
         if code_length < 4 or code_length > 20:
-            return jsonify({'error': '代碼長度必須在 4 到 20 之間'}), 400
+            return jsonify({'error': '專屬碼長度必須在 4 到 20 之間'}), 400
             
         if letter_count < 0 or digit_count < 0:
             return jsonify({'error': '英文字母和數字數量不能為負數'}), 400
@@ -190,21 +190,21 @@ def generate_codes():
         
         # 驗證前後綴長度
         if affix_total_length >= code_length:
-            return jsonify({'error': f'前後綴總長度({affix_total_length})不能大於等於代碼長度({code_length})'}), 400
+            return jsonify({'error': f'前後綴總長度({affix_total_length})不能大於等於專屬碼長度({code_length})'}), 400
         
         if actual_code_length < 1:
-            return jsonify({'error': f'扣除前後綴後，實際代碼長度必須至少為1'}), 400
+            return jsonify({'error': f'扣除前後綴後，實際專屬碼長度必須至少為1'}), 400
             
         if letter_count + digit_count > actual_code_length:
-            return jsonify({'error': f'英文字母數量({letter_count}) + 數字數量({digit_count}) = {letter_count + digit_count} 不能超過實際代碼長度({actual_code_length})'}), 400
+            return jsonify({'error': f'英文字母數量({letter_count}) + 數字數量({digit_count}) = {letter_count + digit_count} 不能超過實際專屬碼長度({actual_code_length})'}), 400
         
-        # 生成任務ID
+        # 產生任務ID
         task_id = str(uuid.uuid4())
         
         # 回傳任務ID給前端
         return jsonify({
             'task_id': task_id,
-            'message': '開始生成折扣碼...',
+            'message': '開始產生專屬碼...',
             'estimated_time': round(count * 0.0001, 2)  # 粗略估算
         })
         
@@ -231,7 +231,7 @@ def handle_start_generation(data):
         digit_count = int(data.get('digit_count', 0))
         letter_case = data.get('letter_case', 'uppercase')
         
-        # 建立生成器
+        # 建立產生器
         generator = DiscountCodeGenerator(
             count=count,
             prefix=prefix,
@@ -249,7 +249,7 @@ def handle_start_generation(data):
             'session': request.sid
         }
         
-        # 在背景執行緒中開始生成
+        # 在背景執行緒中開始產生
         thread = threading.Thread(
             target=generator.generate_batch,
             args=(task_id, request.sid)
@@ -269,7 +269,7 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8000))
     debug = os.environ.get('FLASK_ENV') != 'production'
     
-    print(f"🚀 啟動街聲折扣碼生成器...")
+    print(f"🚀 啟動街聲專屬碼產生器...")
     print(f"   Port: {port}")
     print(f"   Debug: {debug}")
     print(f"   Environment: {os.environ.get('FLASK_ENV', 'development')}")

@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>折扣碼生成器 - powered by StreetVoice</title>
+    <title>專屬碼產生器 - powered by StreetVoice</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <meta name="description" content="快速生成大量優惠券代碼，支援自訂前後綴、字母數字組合，所有代碼本地生成確保隱私安全。">
-    <meta name="keywords" content="折扣碼,優惠券,代碼生成器,批量生成,本地生成">
-    <meta property="og:title" content="折扣碼生成器 - powered by StreetVoice">
-    <meta property="og:description" content="快速生成大量優惠券代碼，支援自訂前後綴、字母數字組合，所有代碼本地生成確保隱私安全。">
+    <meta name="description" content="快速產生大量專屬碼，支援自訂前後綴、字母數字組合，所有專屬碼本地產生確保隱私安全。">
+    <meta name="keywords" content="專屬碼,優惠券,專屬碼產生器,批量產生,本地產生">
+    <meta property="og:title" content="專屬碼產生器 - powered by StreetVoice">
+    <meta property="og:description" content="快速產生大量專屬碼，支援自訂前後綴、字母數字組合，所有專屬碼本地產生確保隱私安全。">
     <meta property="og:type" content="website">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
@@ -17,32 +17,32 @@
     <div class="theme-toggle" id="themeToggle">🌙 深色模式</div>
     <div class="container">
         <div class="header">
-            <h1>折扣碼生成器</h1>
-            <div class="subtitle">快速生成大量優惠券代碼</div>
+            <h1>專屬碼產生器</h1>
+            <div class="subtitle">快速產生大量專屬碼</div>
         </div>
 
         <div class="notice">
             <div class="notice-icon">🔐</div>
             <div class="notice-text" id="privacyText">
-                請放心！我們不會儲存你生成的折扣碼，<br>
-                所有代碼都在本地生成且只存在於你的瀏覽器中。
+                請放心！我們不會儲存你產生的專屬碼，<br>
+                所有專屬碼都在本地產生且只存在於你的瀏覽器中。
             </div>
         </div>
 
         <div class="form-section">
             <form id="generatorForm">
                 <div class="form-group count-group">
-                    <label for="count">生成數量（最多 100,000 筆）</label>
+                    <label for="count">產生數量（最多 100,000 筆）</label>
                     <input type="number" id="count" class="form-control count-input" value="8" min="1" max="100000" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="codeLength">代碼長度（4-20 字元）</label>
+                    <label for="codeLength">專屬碼長度（4-20 字元）</label>
                     <input type="number" id="codeLength" class="form-control" value="8" min="4" max="20" required>
                 </div>
 
                 <div class="code-composition">
-                    <div class="composition-title">代碼內容組成</div>
+                    <div class="composition-title">專屬碼內容組成</div>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="letterCount">英文字母數量</label>
@@ -54,7 +54,7 @@
                         </div>
                     </div>
                     <div style="font-size: 0.85rem; color: #888; margin-top: 8px;">
-                        留空或設為0會自動分配。英文+數字總數不能超過代碼長度。
+                        留空或設為0會自動分配。英文+數字總數不能超過專屬碼長度。
                     </div>
 
                     <div class="collapsible-section">
@@ -71,7 +71,7 @@
                                     <option value="mixed">大小寫混合</option>
                                 </select>
                                 <div style="font-size: 0.85rem; color: #888; margin-top: 5px;">
-                                    僅影響自動生成部分，不影響前後綴
+                                    僅影響自動產生部分，不影響前後綴
                                 </div>
                             </div>
 
@@ -98,14 +98,14 @@
                 </div>
 
                 <button type="submit" class="btn" id="generateBtn">
-                    <span class="btn-text">開始生成</span>
+                    <span class="btn-text">開始產生</span>
                 </button>
             </form>
         </div>
 
         <div id="progressSection" class="progress-section">
             <div class="progress-header">
-                <div class="progress-title">正在生成折扣碼...</div>
+                <div class="progress-title">正在產生專屬碼...</div>
             </div>
             
             <div class="progress-stats">
@@ -136,14 +136,17 @@
 
         <div id="resultsSection" class="results-section">
             <div class="results-header">
-                <div class="results-title">生成完成！</div>
+                <div class="results-title">產生完成！</div>
                 <button class="download-btn" id="downloadBtn">下載為 CSV</button>
             </div>
             <div id="codesContainer" class="codes-container"></div>
+            <div class="results-footer">
+                <button class="restart-btn" id="restartBtn" onclick="location.reload()">重新來過</button>
+            </div>
         </div>
 
         <div class="footer">
-            <p>&copy; <span id="currentYear">2024</span> 折扣碼生成器 · powered by <a href="https://streetvoice.com" target="_blank">StreetVoice</a></p>
+            <p>&copy; <span id="currentYear">2024</span> 專屬碼產生器 · powered by <a href="https://streetvoice.com" target="_blank">StreetVoice</a></p>
             <p class="footer-note">所有功能均在瀏覽器端執行，確保您的資料安全。</p>
         </div>
     </div>

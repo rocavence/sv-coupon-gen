@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# 街聲折扣碼生成器 - Render 部署腳本
+# 街聲專屬碼生成器 - Render 部署腳本
 # StreetVoice Discount Code Generator - Render Deployment Script
 
 set -e  # 遇到錯誤立即停止
 
-echo "🚀 開始部署街聲折扣碼生成器到 Render..."
+echo "🚀 開始部署街聲專屬碼生成器到 Render..."
 echo "🚀 Starting deployment of StreetVoice Discount Code Generator to Render..."
 
 # 顯示 Python 版本
@@ -85,9 +85,9 @@ echo "   - 本地開發: http://localhost:8000"
 echo "   - Render URL: 由 Render 自動提供"
 echo ""
 echo "⚡ 功能特色："
-echo "   ✨ 高性能批量折扣碼生成 (最多 100,000 筆)"
+echo "   ✨ 高性能批量專屬碼生成 (最多 100,000 筆)"
 echo "   ✨ 實時進度追蹤與 WebSocket 通信"
-echo "   ✨ 可自定義代碼格式與前後綴"
+echo "   ✨ 可自定義專屬碼格式與前後綴"
 echo "   ✨ CSV 匯出功能"
 echo "   ✨ 深色/淺色主題切換"
 echo "   ✨ 響應式設計"

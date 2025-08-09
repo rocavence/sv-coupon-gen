@@ -5,10 +5,10 @@ import json
 import time
 
 def test_discount_generator():
-    """測試折扣碼生成器的基本功能"""
+    """測試專屬碼產生器的基本功能"""
     base_url = "http://localhost:8000"
     
-    print("🧪 開始測試折扣碼生成器...")
+    print("🧪 開始測試專屬碼產生器...")
     
     # 測試1: 檢查主頁是否可訪問
     print("\n1️⃣ 測試主頁訪問...")
@@ -23,8 +23,8 @@ def test_discount_generator():
         print(f"❌ 主頁訪問失敗: {e}")
         return False
     
-    # 測試2: 測試生成API
-    print("\n2️⃣ 測試代碼生成API...")
+    # 測試2: 測試產生API
+    print("\n2️⃣ 測試專屬碼產生API...")
     try:
         test_data = {
             "count": 10,
@@ -44,16 +44,16 @@ def test_discount_generator():
         
         if response.status_code == 200:
             result = response.json()
-            print(f"✅ 生成API測試成功")
+            print(f"✅ 產生API測試成功")
             print(f"   任務ID: {result.get('task_id')}")
             print(f"   訊息: {result.get('message')}")
             print(f"   預估時間: {result.get('estimated_time')} 秒")
         else:
-            print(f"❌ 生成API測試失敗，狀態碼: {response.status_code}")
+            print(f"❌ 產生API測試失敗，狀態碼: {response.status_code}")
             print(f"   回應: {response.text}")
             return False
     except Exception as e:
-        print(f"❌ 生成API測試失敗: {e}")
+        print(f"❌ 產生API測試失敗: {e}")
         return False
     
     # 測試3: 測試輸入驗證
@@ -76,8 +76,8 @@ def test_discount_generator():
         print(f"❌ 基本輸入驗證測試失敗: {e}")
         return False
     
-    # 測試4: 測試代碼組成驗證
-    print("\n4️⃣ 測試代碼組成驗證...")
+    # 測試4: 測試專屬碼組成驗證
+    print("\n4️⃣ 測試專屬碼組成驗證...")
     try:
         invalid_composition = {
             "count": 5,
@@ -91,12 +91,12 @@ def test_discount_generator():
                                headers=headers)
         
         if response.status_code == 400:
-            print("✅ 代碼組成驗證測試成功（正確拒絕超出總長度的設定）")
+            print("✅ 專屬碼組成驗證測試成功（正確拒絕超出總長度的設定）")
         else:
-            print(f"❌ 代碼組成驗證測試失敗，應該回傳400但得到: {response.status_code}")
+            print(f"❌ 專屬碼組成驗證測試失敗，應該回傳400但得到: {response.status_code}")
             print(f"   回應: {response.text}")
     except Exception as e:
-        print(f"❌ 代碼組成驗證測試失敗: {e}")
+        print(f"❌ 專屬碼組成驗證測試失敗: {e}")
         return False
     
     print("\n🎉 所有測試通過！應用程式運作正常。")

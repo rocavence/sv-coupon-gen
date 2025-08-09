@@ -1,4 +1,4 @@
-# 🚀 街聲折扣碼生成器部署指南
+# 🚀 街聲專屬碼生成器部署指南
 # StreetVoice Discount Code Generator - Deployment Guide
 
 ## 📋 部署選項 | Deployment Options
@@ -105,7 +105,7 @@
   ```json
   {
     "status": "healthy",
-    "service": "街聲折扣碼生成器",
+    "service": "街聲專屬碼生成器",
     "version": "1.0.0",
     "timestamp": "2025-08-09T11:00:00.000Z"
   }
@@ -139,7 +139,7 @@ lsof -i :8000
 - 確認 Flask-SocketIO 版本相容性
 - 檢查瀏覽器控制台錯誤
 
-#### 4. 記憶體不足 (大量代碼生成)
+#### 4. 記憶體不足 (大量專屬碼生成)
 - 調整批次大小 (app.py 中的 batch_size)
 - 使用更高規格的服務器
 - 分批處理大量請求

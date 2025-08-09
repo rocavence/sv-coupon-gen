@@ -42,12 +42,12 @@ form.addEventListener('submit', async (e) => {
 
     // 驗證輸入
     if (formData.count <= 0 || formData.count > 100000) {
-        showAlert('代碼數量必須在 1 到 100,000 之間', 'error');
+        showAlert('專屬碼數量必須在 1 到 100,000 之間', 'error');
         return;
     }
 
     if (codeLength < 4 || codeLength > 20) {
-        showAlert('代碼長度必須在 4 到 20 之間', 'error');
+        showAlert('專屬碼長度必須在 4 到 20 之間', 'error');
         return;
     }
 
@@ -57,39 +57,39 @@ form.addEventListener('submit', async (e) => {
     
     // 驗證前後綴長度
     if (affixTotalLength >= codeLength) {
-        showAlert(`前後綴總長度(${affixTotalLength})不能大於等於代碼長度(${codeLength})`, 'error');
+        showAlert(`前後綴總長度(${affixTotalLength})不能大於等於專屬碼長度(${codeLength})`, 'error');
         return;
     }
     
     if (actualCodeLength < 1) {
-        showAlert(`扣除前後綴後，實際代碼長度必須至少為1`, 'error');
+        showAlert(`扣除前後綴後，實際專屬碼長度必須至少為1`, 'error');
         return;
     }
 
-    // 驗證代碼組成
+    // 驗證專屬碼組成
     if (letterCount < 0 || digitCount < 0) {
         showAlert('英文字母和數字數量不能為負數', 'error');
         return;
     }
 
     if (letterCount + digitCount > actualCodeLength) {
-        showAlert(`英文字母數量(${letterCount}) + 數字數量(${digitCount}) = ${letterCount + digitCount} 不能超過實際代碼長度(${actualCodeLength})`, 'error');
+        showAlert(`英文字母數量(${letterCount}) + 數字數量(${digitCount}) = ${letterCount + digitCount} 不能超過實際專屬碼長度(${actualCodeLength})`, 'error');
         return;
     }
 
-    // 如果數量 > 1000，先生成預覽
+    // 如果數量 > 1000，先產生預覽
     if (formData.count > 1000) {
         await showPreviewConfirmation(formData);
         return;
     }
 
-    // 直接生成
+    // 直接產生
     await startGeneration(formData);
 });
 
 // Socket.IO 事件處理
 socket.on('generation_started', (data) => {
-    progressText.textContent = '開始生成折扣碼...';
+    progressText.textContent = '開始產生專屬碼...';
 });
 
 socket.on('progress_update', (data) => {
@@ -119,7 +119,7 @@ socket.on('generation_complete', (data) => {
     // 重置按鈕
     resetGenerateButton();
 
-    showAlert(`成功生成 ${data.total_codes.toLocaleString()} 個折扣碼（耗時 ${data.total_time} 秒）`, 'success');
+    showAlert(`成功產生 ${data.total_codes.toLocaleString()} 個專屬碼（耗時 ${data.total_time} 秒）`, 'success');
 });
 
 socket.on('error', (data) => {
@@ -130,25 +130,25 @@ socket.on('error', (data) => {
 
 // 隨機完成訊息
 const completionMessages = [
-    "嗚哇～代碼都生好好惹！🥺✨",
-    "嗚拉！代碼是什麼呀～～哈～💦", 
-    "嗚嗚嗚～代碼軍團集合完畢！🎵",
+    "嗚哇～專屬碼都生好好惹！🥺✨",
+    "嗚拉！專屬碼是什麼呀～～哈～💦", 
+    "嗚嗚嗚～專屬碼軍團集合完畢！🎵",
     "嗚咿～全部做完惹！",
-    "嗚薩薩～代碼寶寶們誕生惹！👶",
-    "代碼生成 ✅ 老闆開心 ✅ 下班時間 ❌",
-    "這些代碼比我的人生還要有秩序 🤡",
-    "代碼大豐收！比抽卡還爽 🎰",
-    "恭喜獲得稀有代碼 SSR 一批！🌟",
-    "代碼製造完成，工廠今日收工 🏭",
-    "佛系生成完成，阿彌陀佛 🙏",
-    "代碼農場大豐收！收成超讚 der 🌾",
-    "代碼料理完成，請慢用～ 👨‍🍳",
-    "嗶嗶嗶～代碼出貨完成！📦",
-    "代碼生成術・發動成功！⚡",
-    "折扣代碼工廠：本日營業額達標！💰",
-    "代碼寶可夢：野生代碼大量出現！",
+    "嗚薩薩～專屬碼寶寶們誕生惹！👶",
+    "專屬碼產生 ✅ 老闆開心 ✅ 下班時間 ❌",
+    "這些專屬碼比我的人生還要有秩序 🤡",
+    "專屬碼大豐收！比抽卡還爽 🎰",
+    "恭喜獲得稀有專屬碼 SSR 一批！🌟",
+    "專屬碼製造完成，工廠今日收工 🏭",
+    "佛系產生完成，阿彌陀佛 🙏",
+    "專屬碼農場大豐收！收成超讚 der 🌾",
+    "專屬碼料理完成，請慢用～ 👨‍🍳",
+    "嗶嗶嗶～專屬碼出貨完成！📦",
+    "專屬碼產生術・發動成功！⚡",
+    "折扣專屬碼工廠：本日營業額達標！💰",
+    "專屬碼寶可夢：野生專屬碼大量出現！",
     "任務完成！經驗值 +999999 ✨",
-    "代碼印表機：墨水用完，請補充 🖨️",
+    "專屬碼印表機：墨水用完，請補充 🖨️",
     "折扣密碼解鎖完成，老闆請笑納 😎"
 ];
 
@@ -166,7 +166,7 @@ function displayResults(codes, totalTime) {
     ).join('');
 
     if (remaining > 0) {
-        codesContainer.innerHTML += `<div class="code-item" style="color: #888; font-style: italic;">... 還有 ${remaining.toLocaleString()} 個代碼（點擊下載查看完整清單）</div>`;
+        codesContainer.innerHTML += `<div class="code-item" style="color: #888; font-style: italic;">... 還有 ${remaining.toLocaleString()} 個專屬碼（點擊下載查看完整清單）</div>`;
     }
 
     resultsSection.classList.add('show');
@@ -269,7 +269,7 @@ document.addEventListener('mousemove', (e) => {
 downloadBtn.addEventListener('click', () => {
     if (generatedCodes.length === 0) return;
 
-    // 取得當前的生成設定
+    // 取得當前的產生設定
     const count = parseInt(document.getElementById('count').value);
     const codeLength = parseInt(document.getElementById('codeLength').value);
     const letterCount = parseInt(document.getElementById('letterCount').value) || 0;
@@ -277,8 +277,8 @@ downloadBtn.addEventListener('click', () => {
     const prefix = document.getElementById('prefix').value.trim();
     const suffix = document.getElementById('suffix').value.trim();
 
-    // 生成規則說明
-    let ruleDescription = `規則,共生成${count}個代碼，長度${codeLength}字元`;
+    // 產生規則說明
+    let ruleDescription = `規則,共產生${count}個專屬碼，長度${codeLength}字元`;
     
     if (letterCount > 0 || digitCount > 0) {
         ruleDescription += `，英文字母${letterCount}個，數字${digitCount}個`;
@@ -295,7 +295,7 @@ downloadBtn.addEventListener('click', () => {
     }
 
     // 建立 CSV 內容
-    let csvContent = ruleDescription + '\n\n序號,折扣碼\n';
+    let csvContent = ruleDescription + '\n\n序號,專屬碼\n';
     
     generatedCodes.forEach((code, index) => {
         csvContent += `${index + 1},${code}\n`;
@@ -324,10 +324,10 @@ downloadBtn.addEventListener('click', () => {
     window.URL.revokeObjectURL(url);
 });
 
-// 重置生成按鈕
+// 重置產生按鈕
 function resetGenerateButton() {
     generateBtn.disabled = false;
-    generateBtn.innerHTML = '<span class="btn-text">開始生成</span>';
+    generateBtn.innerHTML = '<span class="btn-text">開始產生</span>';
 }
 
 // 顯示提示訊息
@@ -407,7 +407,7 @@ advancedToggle.addEventListener('click', () => {
     }
 });
 
-// 自動加總和驗證代碼組成
+// 自動加總和驗證專屬碼組成
 const letterCountInput = document.getElementById('letterCount');
 const digitCountInput = document.getElementById('digitCount');
 const codeLengthInput = document.getElementById('codeLength');
@@ -440,7 +440,7 @@ function autoCalculateComposition(changedField) {
             letterCountInput.value = remainingLetters;
         }
     } else if (changedField === 'length') {
-        // 當代碼長度改變時，重新計算比例
+        // 當專屬碼長度改變時，重新計算比例
         const letterCount = parseInt(letterCountInput.value) || 0;
         const digitCount = parseInt(digitCountInput.value) || 0;
         
@@ -486,11 +486,11 @@ function validateCodeComposition() {
     codeLengthInput.style.borderColor = '';
 
     if (affixTotalLength >= codeLength) {
-        const errorMsg = `前後綴總長度(${affixTotalLength}) >= 代碼長度(${codeLength})`;
+        const errorMsg = `前後綴總長度(${affixTotalLength}) >= 專屬碼長度(${codeLength})`;
         codeLengthInput.style.borderColor = '#ff6b6b';
         showAlert(errorMsg, 'error');
     } else if (letterCount + digitCount > actualCodeLength) {
-        const errorMsg = `英文(${letterCount}) + 數字(${digitCount}) = ${letterCount + digitCount} > 實際代碼長度(${actualCodeLength})`;
+        const errorMsg = `英文(${letterCount}) + 數字(${digitCount}) = ${letterCount + digitCount} > 實際專屬碼長度(${actualCodeLength})`;
         letterCountInput.style.borderColor = '#ff6b6b';
         digitCountInput.style.borderColor = '#ff6b6b';
         showAlert(errorMsg, 'error');
@@ -606,7 +606,7 @@ function updateFormatPreview() {
     const prefix = document.getElementById('prefix').value.trim();
     const suffix = document.getElementById('suffix').value.trim();
     
-    // 計算實際代碼長度
+    // 計算實際專屬碼長度
     const affixTotalLength = prefix.length + suffix.length;
     const actualCodeLength = Math.max(0, codeLength - affixTotalLength);
     
@@ -617,7 +617,7 @@ function updateFormatPreview() {
         previewParts.push(prefix);
     }
     
-    // 生成中間代碼部分描述
+    // 產生中間專屬碼部分描述
     let codeDescription = '';
     if (actualCodeLength <= 0) {
         codeDescription = '無可用空間';
@@ -694,12 +694,12 @@ function updateFormatPreview() {
 
 // 隱私說明文字版本
 const privacyTexts = [
-    "請放心！我們不會儲存你生成的折扣碼，<br>所有代碼都在本地生成且只存在於你的瀏覽器中。",
-    "折扣碼：生於瀏覽器，死於分頁關閉。",
+    "請放心！我們不會儲存你產生的專屬碼，<br>所有專屬碼都在本地產生且只存在於你的瀏覽器中。",
+    "專屬碼：生於瀏覽器，死於分頁關閉。",
     "我們不存，你不存，誰都不存。", 
-    "代碼不會上雲，因為它懶，根本懶得爬。",
+    "專屬碼不會上雲，因為它懶，根本懶得爬。",
     "本地現做，關掉就掰。",
-    "伺服器：我哪有看到折扣碼？蛤？"
+    "伺服器：我哪有看到專屬碼？蛤？"
 ];
 
 // 動態顯示當前年份
@@ -735,11 +735,11 @@ document.addEventListener('DOMContentLoaded', function() {
 // 顯示預覽確認對話框
 async function showPreviewConfirmation(formData) {
     try {
-        // 生成 10 筆預覽代碼
+        // 產生 10 筆預覽專屬碼
         const previewData = { ...formData, count: 10 };
         
         generateBtn.disabled = true;
-        generateBtn.innerHTML = '<div class="loading-spinner"></div> <span>生成預覽中...</span>';
+        generateBtn.innerHTML = '<div class="loading-spinner"></div> <span>產生預覽中...</span>';
 
         const response = await fetch('/generate', {
             method: 'POST',
@@ -752,10 +752,10 @@ async function showPreviewConfirmation(formData) {
         const result = await response.json();
         
         if (!response.ok) {
-            throw new Error(result.error || '預覽生成失敗');
+            throw new Error(result.error || '預覽產生失敗');
         }
 
-        // 生成預覽代碼
+        // 產生預覽專屬碼
         const previewTaskId = result.task_id;
         
         // 監聽預覽完成事件
@@ -768,7 +768,7 @@ async function showPreviewConfirmation(formData) {
         
         socket.on('generation_complete', previewCompleteHandler);
         
-        // 開始生成預覽
+        // 開始產生預覽
         socket.emit('start_generation', {
             task_id: previewTaskId,
             ...previewData
@@ -787,17 +787,17 @@ function showPreviewModal(previewCodes, originalFormData) {
     modal.className = 'preview-modal';
     modal.innerHTML = `
         <div class="preview-modal-content">
-            <h3>偵測到大量生成！</h3>
-            <p>以下是根據您的設定生成的 ${previewCodes.length} 個代碼預覽：</p>
+            <h3>偵測到大量產生！</h3>
+            <p>以下是根據您的設定產生的 ${previewCodes.length} 個專屬碼預覽：</p>
             <div class="preview-codes">
                 ${previewCodes.map(code => `<div class="code-item">${code}</div>`).join('')}
             </div>
             <p class="preview-question">
-                確認要生成 <strong>${originalFormData.count.toLocaleString()}</strong> 個代碼嗎？
+                確認要產生 <strong>${originalFormData.count.toLocaleString()}</strong> 個專屬碼嗎？
             </p>
             <div class="preview-buttons">
                 <button class="btn-secondary" id="cancelBtn">取消</button>
-                <button class="btn-primary" id="confirmBtn">確認生成</button>
+                <button class="btn-primary" id="confirmBtn">確認產生</button>
             </div>
         </div>
     `;
@@ -824,7 +824,7 @@ function showPreviewModal(previewCodes, originalFormData) {
     });
 }
 
-// 開始實際生成
+// 開始實際產生
 async function startGeneration(formData) {
     try {
         // 禁用按鈕並顯示載入狀態
@@ -834,7 +834,7 @@ async function startGeneration(formData) {
         // 隱藏結果區域
         resultsSection.classList.remove('show');
 
-        // 發送生成請求到後端
+        // 發送產生請求到後端
         const response = await fetch('/generate', {
             method: 'POST',
             headers: {
@@ -846,7 +846,7 @@ async function startGeneration(formData) {
         const result = await response.json();
 
         if (!response.ok) {
-            throw new Error(result.error || '生成失敗');
+            throw new Error(result.error || '產生失敗');
         }
 
         currentTaskId = result.task_id;
@@ -854,7 +854,7 @@ async function startGeneration(formData) {
         // 顯示進度區域
         progressSection.classList.add('show');
 
-        // 透過 Socket.IO 開始生成
+        // 透過 Socket.IO 開始產生
         socket.emit('start_generation', {
             task_id: currentTaskId,
             ...formData
