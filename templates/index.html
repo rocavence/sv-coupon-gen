@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>折扣碼生成器 - powered by StreetVoice</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <meta name="description" content="快速生成大量優惠券代碼，支援自訂前後綴、字母數字組合，所有代碼本地生成確保隱私安全。">
+    <meta name="keywords" content="折扣碼,優惠券,代碼生成器,批量生成,本地生成">
+    <meta property="og:title" content="折扣碼生成器 - powered by StreetVoice">
+    <meta property="og:description" content="快速生成大量優惠券代碼，支援自訂前後綴、字母數字組合，所有代碼本地生成確保隱私安全。">
+    <meta property="og:type" content="website">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
 </head>
@@ -17,7 +23,7 @@
 
         <div class="notice">
             <div class="notice-icon">🔐</div>
-            <div class="notice-text">
+            <div class="notice-text" id="privacyText">
                 請放心！我們不會儲存你生成的折扣碼，<br>
                 所有代碼都在本地生成且只存在於你的瀏覽器中。
             </div>

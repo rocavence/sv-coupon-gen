@@ -128,10 +128,38 @@ socket.on('error', (data) => {
     resetGenerateButton();
 });
 
+// 隨機完成訊息
+const completionMessages = [
+    "嗚哇～代碼都生好好惹！🥺✨",
+    "嗚拉！代碼是什麼呀～～哈～💦", 
+    "嗚嗚嗚～代碼軍團集合完畢！🎵",
+    "嗚咿～全部做完惹！",
+    "嗚薩薩～代碼寶寶們誕生惹！👶",
+    "代碼生成 ✅ 老闆開心 ✅ 下班時間 ❌",
+    "這些代碼比我的人生還要有秩序 🤡",
+    "代碼大豐收！比抽卡還爽 🎰",
+    "恭喜獲得稀有代碼 SSR 一批！🌟",
+    "代碼製造完成，工廠今日收工 🏭",
+    "佛系生成完成，阿彌陀佛 🙏",
+    "代碼農場大豐收！收成超讚 der 🌾",
+    "代碼料理完成，請慢用～ 👨‍🍳",
+    "嗶嗶嗶～代碼出貨完成！📦",
+    "代碼生成術・發動成功！⚡",
+    "折扣代碼工廠：本日營業額達標！💰",
+    "代碼寶可夢：野生代碼大量出現！",
+    "任務完成！經驗值 +999999 ✨",
+    "代碼印表機：墨水用完，請補充 🖨️",
+    "折扣密碼解鎖完成，老闆請笑納 😎"
+];
+
 // 顯示結果
 function displayResults(codes, totalTime) {
     const preview = codes.slice(0, 50); // 只顯示前50個
     const remaining = codes.length - preview.length;
+
+    // 隨機選擇完成訊息
+    const randomMessage = completionMessages[Math.floor(Math.random() * completionMessages.length)];
+    document.querySelector('.results-title').textContent = randomMessage;
 
     codesContainer.innerHTML = preview.map(code => 
         `<div class="code-item">${code}</div>`
@@ -571,12 +599,40 @@ function updateFormatPreview() {
     previewContent.textContent = previewParts.join('');
 }
 
+// 隱私說明文字版本
+const privacyTexts = [
+    "請放心！我們不會儲存你生成的折扣碼，<br>所有代碼都在本地生成且只存在於你的瀏覽器中。",
+    "折扣碼：生於瀏覽器，死於分頁關閉。",
+    "我們不存，你不存，誰都不存。", 
+    "代碼不會上雲，因為它懶，根本懶得爬。",
+    "本地現做，關掉就掰。",
+    "伺服器：我哪有看到折扣碼？蛤？"
+];
+
 // 動態顯示當前年份
 document.addEventListener('DOMContentLoaded', function() {
     const currentYear = new Date().getFullYear();
     const yearElement = document.getElementById('currentYear');
     if (yearElement) {
         yearElement.textContent = currentYear;
+    }
+    
+    // 隨機選擇隱私說明文字
+    const privacyTextElement = document.getElementById('privacyText');
+    if (privacyTextElement) {
+        const random = Math.random();
+        let selectedText;
+        
+        if (random < 0.5) {
+            // 50% 機率顯示原文
+            selectedText = privacyTexts[0];
+        } else {
+            // 50% 機率隨機選擇其他五款
+            const funnyTexts = privacyTexts.slice(1);
+            selectedText = funnyTexts[Math.floor(Math.random() * funnyTexts.length)];
+        }
+        
+        privacyTextElement.innerHTML = selectedText;
     }
     
     // 初始化預覽
@@ -638,7 +694,7 @@ function showPreviewModal(previewCodes, originalFormData) {
     modal.className = 'preview-modal';
     modal.innerHTML = `
         <div class="preview-modal-content">
-            <h3>預覽生成結果</h3>
+            <h3>偵測到大量生成！</h3>
             <p>以下是根據您的設定生成的 ${previewCodes.length} 個代碼預覽：</p>
             <div class="preview-codes">
                 ${previewCodes.map(code => `<div class="code-item">${code}</div>`).join('')}
