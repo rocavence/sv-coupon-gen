@@ -16,6 +16,9 @@ function switchLanguage(lang) {
   // 保存到 localStorage
   localStorage.setItem('language', lang);
   
+  // 更新 URL 路徑結構
+  updateUrlForLanguage(lang);
+  
   // 更新所有文本
   updateAllTexts();
   
@@ -36,6 +39,121 @@ function switchLanguage(lang) {
   
   // 更新語言切換器狀態
   updateLanguageSwitcher();
+}
+
+// 更新 URL 路徑結構
+function updateUrlForLanguage(lang) {
+  const currentPath = window.location.pathname;
+  const currentSearch = window.location.search;
+  const currentHash = window.location.hash;
+  
+  let newPath;
+  
+  // 先清理現有路徑，移除所有語言前綴
+  let cleanPath = currentPath;
+  if (cleanPath.startsWith('/zh-hant/')) {
+    cleanPath = cleanPath.replace('/zh-hant/', '/');
+  } else if (cleanPath === '/zh-hant' || cleanPath === '/zh-hant/') {
+    cleanPath = '/';
+  }
+  
+  if (lang === 'zh') {
+    // 中文版：加上 /zh-hant/ 前綴（帶尾斜線）
+    if (cleanPath === '/') {
+      newPath = '/zh-hant/';
+    } else {
+      newPath = '/zh-hant' + cleanPath;
+    }
+  } else {
+    // 英文版：使用清理後的路徑
+    newPath = cleanPath;
+  }
+  
+  // 如果路徑有變化，更新 URL（不重新載入頁面）
+  if (newPath !== currentPath) {
+    const newUrl = newPath + currentSearch + currentHash;
+    window.history.pushState({ language: lang }, '', newUrl);
+    console.log('URL updated from', currentPath, 'to', newPath);
+  }
+}
+
+// 從 URL 判斷當前應該使用的語言
+function detectLanguageFromUrl() {
+  const path = window.location.pathname;
+  
+  if (path.startsWith('/zh-hant/') || path === '/zh-hant' || path === '/zh-hant/') {
+    return 'zh';
+  } else {
+    return 'en';
+  }
+}
+
+// 從瀏覽器偵測用戶偏好語言
+function detectBrowserLanguage() {
+  // 獲取瀏覽器語言設定
+  const browserLang = navigator.language || navigator.userLanguage || navigator.browserLanguage || navigator.systemLanguage;
+  const browserLangs = navigator.languages || [browserLang];
+  
+  // 中文相關的語言代碼
+  const chineseLanguageCodes = [
+    'zh',           // 中文（通用）
+    'zh-CN',        // 中文（簡體，中國）
+    'zh-TW',        // 中文（繁體，台灣）
+    'zh-HK',        // 中文（繁體，香港）
+    'zh-MO',        // 中文（繁體，澳門）
+    'zh-SG',        // 中文（簡體，新加坡）
+    'zh-Hans',      // 中文（簡體）
+    'zh-Hant',      // 中文（繁體）
+    'zh-Hans-CN',   // 中文（簡體，中國）
+    'zh-Hant-TW',   // 中文（繁體，台灣）
+    'zh-Hant-HK',   // 中文（繁體，香港）
+    'zh-Hant-MO'    // 中文（繁體，澳門）
+  ];
+  
+  // 檢查主要語言設定
+  for (const lang of browserLangs) {
+    const normalizedLang = lang.toLowerCase();
+    
+    // 檢查是否為中文相關語言
+    if (chineseLanguageCodes.some(code => 
+      normalizedLang === code.toLowerCase() || 
+      normalizedLang.startsWith(code.toLowerCase() + '-')
+    )) {
+      return 'zh';
+    }
+    
+    // 檢查是否為英文
+    if (normalizedLang.startsWith('en')) {
+      return 'en';
+    }
+  }
+  
+  // 預設回傳中文（因為這是中文為主的應用）
+  return 'zh';
+}
+
+// 處理瀏覽器的前進/後退按鈕
+function handlePopState(event) {
+  const urlLang = detectLanguageFromUrl();
+  if (urlLang !== currentLanguage) {
+    // 不要觸發 URL 更新，只更新語言狀態
+    const oldCurrentLanguage = currentLanguage;
+    currentLanguage = urlLang;
+    localStorage.setItem('language', urlLang);
+    
+    // 更新所有 UI 元素
+    updateAllTexts();
+    updatePrivacyText();
+    updateFormatPreview();
+    updateFormValidationMessages();
+    updateLanguageSwitcher();
+    
+    // 控制格式預覽顯示
+    const formatPreview = document.getElementById('formatPreview');
+    if (formatPreview) {
+      formatPreview.style.display = (urlLang === 'zh') ? 'block' : 'none';
+    }
+  }
 }
 
 // 更新表單驗證訊息
@@ -271,9 +389,55 @@ function updateThemeToggleText() {
 
 // 初始化語言系統
 function initializeLanguage() {
-  // 從 localStorage 讀取保存的語言設定
-  const savedLanguage = localStorage.getItem('language') || 'zh';
-  switchLanguage(savedLanguage);
+  let selectedLanguage;
+  
+  // 優先順序：URL > localStorage > 瀏覽器語言 > 預設中文
+  const urlLanguage = detectLanguageFromUrl();
+  const savedLanguage = localStorage.getItem('language');
+  const browserLanguage = detectBrowserLanguage();
+  const currentPath = window.location.pathname;
+  
+  if ((currentPath.startsWith('/zh-hant/') || currentPath === '/zh-hant' || currentPath === '/zh-hant/') && urlLanguage === 'zh') {
+    // 1. 如果 URL 有明確的中文語言路徑，優先使用
+    selectedLanguage = 'zh';
+    console.log('Language detected from URL:', urlLanguage, 'Path:', currentPath);
+  } else if (currentPath === '/' && savedLanguage) {
+    // 2. 根路徑且有保存的用戶偏好，使用保存的設定
+    selectedLanguage = savedLanguage;
+    console.log('Language loaded from localStorage:', savedLanguage);
+    // 更新 URL 以反映保存的語言偏好
+    updateUrlForLanguage(savedLanguage);
+  } else if (currentPath === '/') {
+    // 3. 根路徑的新用戶：根據瀏覽器語言自動判斷
+    selectedLanguage = browserLanguage;
+    console.log('Language auto-detected from browser:', browserLanguage, 'from languages:', navigator.languages);
+    // 更新 URL 和 localStorage
+    updateUrlForLanguage(selectedLanguage);
+  } else {
+    // 4. 其他情況（如英文路徑），使用 URL 偵測結果
+    selectedLanguage = urlLanguage || 'en';
+    console.log('Language fallback to URL detection or English:', selectedLanguage);
+  }
+  
+  // 應用選定的語言
+  currentLanguage = selectedLanguage;
+  localStorage.setItem('language', selectedLanguage);
+  
+  // 更新所有 UI 元素
+  updateAllTexts();
+  updatePrivacyText();
+  updateFormatPreview();
+  updateFormValidationMessages();
+  updateLanguageSwitcher();
+  
+  // 控制格式預覽顯示
+  const formatPreview = document.getElementById('formatPreview');
+  if (formatPreview) {
+    formatPreview.style.display = (currentLanguage === 'zh') ? 'block' : 'none';
+  }
+  
+  // 輸出最終選定的語言資訊（開發用）
+  console.log('Final language selected:', currentLanguage, 'URL:', window.location.pathname);
 }
 
 // DOM 元素
@@ -432,98 +596,7 @@ function displayResults(codes, totalTime) {
     resultsSection.classList.add('show');
 }
 
-// 下載按鈕 Q 彈動畫效果
-let downloadPressStartTime = 0;
-
-function triggerDownloadBounce(e, force) {
-    const rect = downloadBtn.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-
-    const dx = clientX - centerX;
-    const dy = clientY - centerY;
-
-    // 限制旋轉角度
-    let rawAngle = Math.atan2(dy, dx) * (180 / Math.PI);
-    if (rawAngle > 100) rawAngle = 100;
-    if (rawAngle < -100) rawAngle = -100;
-    downloadBtn.style.setProperty('--angle', `${rawAngle}deg`);
-
-    // 力道影響壓縮比例
-    const squashX = 1 + 0.15 * force;
-    const squashY = 1 - 0.15 * force;
-    const stretchX = 1 - 0.08 * force;
-    const stretchY = 1 + 0.08 * force;
-
-    downloadBtn.style.setProperty('--squash-transform', `scale(${squashX}, ${squashY}) rotate(${rawAngle}deg)`);
-    downloadBtn.style.setProperty('--stretch-transform', `scale(${stretchX}, ${stretchY}) rotate(${rawAngle}deg)`);
-
-    downloadBtn.classList.remove('animate-squash');
-    void downloadBtn.offsetWidth;
-    downloadBtn.classList.add('animate-squash');
-}
-
-// 滑鼠力道模擬
-downloadBtn.addEventListener('mousedown', () => {
-    downloadPressStartTime = Date.now();
-});
-
-downloadBtn.addEventListener('mouseup', (e) => {
-    const duration = Date.now() - downloadPressStartTime;
-    const fakeForce = Math.min(1, duration / 500);
-    triggerDownloadBounce(e, fakeForce);
-});
-
-// 觸控力道
-downloadBtn.addEventListener('touchstart', () => {
-    downloadPressStartTime = Date.now();
-});
-
-downloadBtn.addEventListener('touchend', (e) => {
-    const touch = e.changedTouches[0];
-    let force = 0;
-    if (touch.force !== undefined && touch.force > 0) {
-        force = Math.min(1, touch.force);
-    } else {
-        const duration = Date.now() - downloadPressStartTime;
-        force = Math.min(1, duration / 500);
-    }
-    triggerDownloadBounce(e, force);
-});
-
-// 滑鼠靠近閃避效果
-document.addEventListener('mousemove', (e) => {
-    if (!downloadBtn || !resultsSection.classList.contains('show')) return;
-    
-    const rect = downloadBtn.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-
-    const dx = e.clientX - centerX;
-    const dy = e.clientY - centerY;
-
-    const distance = Math.sqrt(dx*dx + dy*dy);
-    const radius = 120; // 感應範圍
-    const maxOffset = 20; // 最大位移 px
-
-    if (distance < radius) {
-        // 計算反方向位移
-        const factor = (radius - distance) / radius; // 越近位移越大
-        const offsetX = Math.min(maxOffset, dx * factor * 0.5) * -1;
-        const offsetY = Math.min(maxOffset, dy * factor * 0.5) * -1;
-
-        downloadBtn.style.setProperty('--offset-x', `${offsetX}px`);
-        downloadBtn.style.setProperty('--offset-y', `${offsetY}px`);
-        downloadBtn.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-    } else {
-        // 回到原位
-        downloadBtn.style.setProperty('--offset-x', `0px`);
-        downloadBtn.style.setProperty('--offset-y', `0px`);
-        downloadBtn.style.transform = `translate(0px, 0px)`;
-    }
-});
+// 下載按鈕動畫效果現在由 download-effects.js 處理
 
 // 下載功能
 downloadBtn.addEventListener('click', () => {
@@ -996,6 +1069,9 @@ function getAlertMessage(key, ...args) {
 document.addEventListener('DOMContentLoaded', function() {
     // 初始化語言系統
     initializeLanguage();
+    
+    // 監聽瀏覽器前進/後退按鈕
+    window.addEventListener('popstate', handlePopState);
     
     // 語言切換按鈕事件
     const languageSwitch = document.getElementById('languageSwitch');

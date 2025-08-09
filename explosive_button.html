@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>爆炸按鈕 - 點擊三次後爆炸</title>
+<style>
+  body {
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    background: #f0f0f0;
+    margin: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+  }
+  
+  .container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .playful-btn {
+    padding: 12px 24px;
+    font-size: 18px;
+    background-color: #ff6f61;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    outline: none;
+    user-select: none;
+    position: relative;
+    transition: transform 0.15s linear;
+    box-shadow: 0 4px 15px rgba(255, 111, 97, 0.3);
+  }
+
+  @keyframes squashBounce {
+    0%   { transform: var(--start-transform, scale(1,1)) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    25%  { transform: var(--squash-transform) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    50%  { transform: var(--stretch-transform) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    70%  { transform: scale(1.05, 0.97) rotate(var(--angle, 0deg)) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    85%  { transform: scale(0.98, 1.02) rotate(var(--angle, 0deg)) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    100% { transform: scale(1,1) rotate(0deg) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+  }
+
+  @keyframes violentShake {
+    0%   { transform: rotate(0deg) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    10%  { transform: rotate(-8deg) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    20%  { transform: rotate(12deg) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    30%  { transform: rotate(-15deg) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    40%  { transform: rotate(10deg) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    50%  { transform: rotate(-12deg) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    60%  { transform: rotate(8deg) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    70%  { transform: rotate(-10deg) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    80%  { transform: rotate(6deg) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    90%  { transform: rotate(-4deg) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    100% { transform: rotate(0deg) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+  }
+
+  @keyframes finalBounce {
+    0%   { transform: translateY(0px) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    15%  { transform: translateY(-30px) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    30%  { transform: translateY(0px) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    40%  { transform: translateY(-30px) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    50%  { transform: translateY(0px) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    58%  { transform: translateY(-30px) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    66%  { transform: translateY(0px) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    72%  { transform: translateY(-30px) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    78%  { transform: translateY(0px) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    83%  { transform: translateY(-30px) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    88%  { transform: translateY(0px) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    92%  { transform: translateY(-30px) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    96%  { transform: translateY(0px) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+    100% { transform: translateY(0px) translate(var(--offset-x, 0px), var(--offset-y, 0px)); }
+  }
+
+  .animate-squash {
+    animation: squashBounce 0.49s ease-out;
+  }
+  
+  .animate-shake {
+    animation: violentShake 0.5s ease-in-out;
+    transform-origin: center top;
+  }
+  
+  .animate-bounce {
+    animation: finalBounce 0.6s ease-in;
+  }
+  
+  .particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: #ff6f61;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  
+  .ash {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: #666;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  
+  .explosion-flash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: white;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 1000;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <button class="playful-btn" id="mainBtn">點我！</button>
+  </div>
+  
+  <div class="explosion-flash" id="flash"></div>
+
+<script>
+  const btn = document.querySelector('#mainBtn');
+  const flash = document.querySelector('#flash');
+  let pressStartTime = 0;
+  let clickCount = 0;
+  let isExploded = false;
+
+  // ========================================
+  // 1. 滑鼠靠近閃躲
+  // ========================================
+  document.addEventListener('mousemove', (e) => {
+    if (isExploded) return;
+    
+    const rect = btn.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const dx = e.clientX - centerX;
+    const dy = e.clientY - centerY;
+
+    const distance = Math.sqrt(dx*dx + dy*dy);
+    const radius = 120;
+    const maxOffset = 20;
+
+    if (distance < radius) {
+      const factor = (radius - distance) / radius;
+      const offsetX = Math.min(maxOffset, dx * factor * 0.5) * -1;
+      const offsetY = Math.min(maxOffset, dy * factor * 0.5) * -1;
+
+      btn.style.setProperty('--offset-x', `${offsetX}px`);
+      btn.style.setProperty('--offset-y', `${offsetY}px`);
+      btn.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+    } else {
+      btn.style.setProperty('--offset-x', `0px`);
+      btn.style.setProperty('--offset-y', `0px`);
+      btn.style.transform = `translate(0px, 0px)`;
+    }
+  });
+
+  // ========================================
+  // 2. 點擊的效果
+  // ========================================
+  function triggerBounce(e, force) {
+    if (isExploded) return;
+    
+    const rect = btn.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+
+    const dx = clientX - centerX;
+    const dy = clientY - centerY;
+
+    let rawAngle = Math.atan2(dy, dx) * (180 / Math.PI);
+    if (rawAngle > 100) rawAngle = 100;
+    if (rawAngle < -100) rawAngle = -100;
+    btn.style.setProperty('--angle', `${rawAngle}deg`);
+
+    const squashX = 1 + 0.15 * force;
+    const squashY = 1 - 0.15 * force;
+    const stretchX = 1 - 0.08 * force;
+    const stretchY = 1 + 0.08 * force;
+
+    btn.style.setProperty('--squash-transform', `scale(${squashX}, ${squashY}) rotate(${rawAngle}deg)`);
+    btn.style.setProperty('--stretch-transform', `scale(${stretchX}, ${stretchY}) rotate(${rawAngle}deg)`);
+
+    btn.classList.remove('animate-squash');
+    void btn.offsetWidth;
+    btn.classList.add('animate-squash');
+  }
+
+  // 滑鼠事件
+  btn.addEventListener('mousedown', () => {
+    if (!isExploded) pressStartTime = Date.now();
+  });
+  
+  btn.addEventListener('mouseup', (e) => {
+    if (isExploded) return;
+    const duration = Date.now() - pressStartTime;
+    const fakeForce = Math.min(1, duration / 500);
+    triggerBounce(e, fakeForce);
+    checkExplosion(); // 在事件中呼叫爆炸檢查
+  });
+
+  // 觸控事件
+  btn.addEventListener('touchstart', () => {
+    if (!isExploded) pressStartTime = Date.now();
+  });
+  
+  btn.addEventListener('touchend', (e) => {
+    if (isExploded) return;
+    const touch = e.changedTouches[0];
+    let force = 0;
+    if (touch.force !== undefined && touch.force > 0) {
+      force = Math.min(1, touch.force);
+    } else {
+      const duration = Date.now() - pressStartTime;
+      force = Math.min(1, duration / 500);
+    }
+    triggerBounce(e, force);
+    checkExplosion(); // 在事件中呼叫爆炸檢查
+  });
+
+  // ========================================
+  // 3. 點擊三次+爆炸效果
+  // ========================================
+  function checkExplosion() {
+    // 增加點擊次數
+    clickCount++;
+    
+    // 檢查是否達到爆炸條件
+    if (clickCount >= 3) {
+      isExploded = true;
+      
+      // 先播放抖動動畫
+      btn.classList.remove('animate-squash');
+      btn.classList.add('animate-shake');
+      
+      // 0.5秒後播放彈跳動畫
+      setTimeout(() => {
+        btn.classList.remove('animate-shake');
+        btn.classList.add('animate-bounce');
+        
+        // 再0.6秒後爆炸
+        setTimeout(() => {
+          createExplosion();
+        }, 600);
+      }, 500);
+    }
+  }
+
+  function createExplosion() {
+    const rect = btn.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const buttonSize = Math.max(rect.width, rect.height);
+    const maxRange = buttonSize * 2;
+    const groundLevel = rect.bottom;
+    
+    // 隱藏按鈕
+    btn.style.opacity = '0';
+    btn.style.pointerEvents = 'none';
+    
+    // 閃光效果
+    flash.style.opacity = '0.7';
+    setTimeout(() => {
+      flash.style.opacity = '0';
+    }, 100);
+    
+    // 創建90個爆炸粒子
+    for (let i = 0; i < 90; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      
+      const colors = ['#ff6f61', '#ffaa44', '#ff3333', '#ffff44', '#ff8844'];
+      particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+      
+      const size = Math.random() * 6 + 3;
+      particle.style.width = size + 'px';
+      particle.style.height = size + 'px';
+      
+      particle.style.left = centerX + 'px';
+      particle.style.top = centerY + 'px';
+      
+      document.body.appendChild(particle);
+      
+      const angle = (Math.PI * 2 * i) / 90;
+      const velocity = Math.random() * 150 + 50;
+      
+      let x = 0;
+      let y = 0;
+      let vx = Math.cos(angle) * velocity;
+      let vy = Math.sin(angle) * velocity;
+      let startTime = Date.now();
+      let hasLanded = false;
+      
+      function animateParticle() {
+        const elapsed = (Date.now() - startTime) / 1000;
+        
+        if (!hasLanded) {
+          const distance = Math.sqrt(x*x + y*y);
+          if (distance < maxRange) {
+            vx *= 0.99;
+            vy = vy * 0.99 + 300 * elapsed;
+            
+            x += vx * elapsed;
+            y += vy * elapsed;
+            
+            if (centerY + y >= groundLevel) {
+              hasLanded = true;
+              y = groundLevel - centerY;
+              
+              particle.className = 'ash';
+              particle.style.background = '#666';
+              particle.style.width = '2px';
+              particle.style.height = '2px';
+            }
+          } else {
+            vx *= 0.8;
+            vy *= 0.8;
+            x += vx * elapsed;
+            y += vy * elapsed;
+          }
+          
+          particle.style.transform = `translate(${x}px, ${y}px)`;
+          particle.style.opacity = Math.max(0, 1 - elapsed * 0.8);
+        } else {
+          particle.style.transform = `translate(${x}px, ${y}px)`;
+          particle.style.opacity = Math.max(0, 0.8 - elapsed * 0.3);
+        }
+        
+        if (elapsed < 4) {
+          requestAnimationFrame(animateParticle);
+        } else {
+          particle.remove();
+        }
+      }
+      
+      animateParticle();
+    }
+  }
+</script>
+</body>
+</html>

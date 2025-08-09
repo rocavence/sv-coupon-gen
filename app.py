@@ -151,6 +151,16 @@ class DiscountCodeGenerator:
 def index():
     return render_template('index.html')
 
+@app.route('/zh-hant/')
+def index_zh_hant():
+    """中文路徑的首頁"""
+    return render_template('index.html')
+
+@app.route('/zh-hant')
+def index_zh_hant_redirect():
+    """處理不帶尾斜線的中文路徑"""
+    return render_template('index.html')
+
 @app.route('/health')
 def health_check():
     """健康檢查端點 - Health check endpoint for monitoring"""
