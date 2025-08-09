@@ -2,6 +2,218 @@ const socket = io();
 let currentTaskId = null;
 let generatedCodes = [];
 
+// 語言系統 - 支援未來擴充
+const translations = {
+  zh: {
+    // 頁面基本信息
+    title: "專屬碼產生器 - powered by StreetVoice",
+    headerTitle: "專屬碼產生器", 
+    headerSubtitle: "快速產生大量專屬碼",
+    
+    // 表單標籤
+    countLabel: "產生數量（最多 100,000 筆）",
+    codeLengthLabel: "專屬碼長度（4-20 字元）",
+    compositionTitle: "專屬碼內容組成",
+    letterCountLabel: "英文字母數量",
+    digitCountLabel: "數字數量", 
+    letterCaseLabel: "英文字母大小寫",
+    prefixLabel: "前綴",
+    suffixLabel: "後綴",
+    formatPreviewTitle: "格式預覽",
+    compositionNote: "留空或設為0會自動分配。英文+數字總數不能超過專屬碼長度。",
+    caseNote: "僅影響自動產生部分，不影響前後綴",
+    
+    // 按鈕
+    generateBtn: "開始產生",
+    downloadBtn: "下載完整 .CSV", 
+    restartBtn: "重新來過",
+    
+    // 進度相關
+    progressTitle: "正在產生專屬碼...",
+    progressLabels: {
+      progress: "完成進度",
+      completed: "已完成",
+      remaining: "預估剩餘", 
+      batch: "批次"
+    },
+    progressText: "準備開始...",
+    
+    // 結果相關
+    resultsTitle: "產生完成！",
+    
+    // 主題切換
+    themeToggle: {
+      dark: "🌙 深色模式",
+      light: "☀️ 淺色模式"
+    },
+    
+    // 頁尾
+    footerText: "專屬碼產生器 · powered by",
+    footerNote: "所有功能均在瀏覽器端執行，確保您的資料安全。"
+  },
+  
+  en: {
+    // Basic page info
+    title: "Exclusive Code Generator - powered by StreetVoice",
+    headerTitle: "Exclusive Code Generator",
+    headerSubtitle: "Quick bulk exclusive code generation",
+    
+    // Form labels
+    countLabel: "Generation Count (Max 100,000)",
+    codeLengthLabel: "Code Length (4-20 characters)", 
+    compositionTitle: "Code Content Composition",
+    letterCountLabel: "Number of Letters",
+    digitCountLabel: "Number of Digits",
+    letterCaseLabel: "Letter Case",
+    prefixLabel: "Prefix",
+    suffixLabel: "Suffix",
+    formatPreviewTitle: "Format Preview", 
+    compositionNote: "Leave empty or set to 0 for automatic allocation. Letters + digits total cannot exceed code length.",
+    caseNote: "Only affects auto-generated parts, not prefixes/suffixes",
+    
+    // Buttons
+    generateBtn: "Start Generation",
+    downloadBtn: "Download Complete .CSV",
+    restartBtn: "Start Over",
+    
+    // Progress related
+    progressTitle: "Generating exclusive codes...",
+    progressLabels: {
+      progress: "Progress",
+      completed: "Completed", 
+      remaining: "Est. Remaining",
+      batch: "Batch"
+    },
+    progressText: "Ready to start...",
+    
+    // Results related
+    resultsTitle: "Generation Complete!",
+    
+    // Theme toggle  
+    themeToggle: {
+      dark: "🌙 Dark Mode",
+      light: "☀️ Light Mode"
+    },
+    
+    // Footer
+    footerText: "Exclusive Code Generator · powered by", 
+    footerNote: "All functions run in the browser to ensure your data security."
+  }
+};
+
+// 當前語言設定
+let currentLanguage = 'zh';
+
+// 語言切換函數
+function switchLanguage(lang) {
+  if (!translations[lang]) return;
+  currentLanguage = lang;
+  
+  // 保存到 localStorage
+  localStorage.setItem('language', lang);
+  
+  // 更新所有文本
+  updateAllTexts();
+  
+  // 更新語言切換器狀態
+  updateLanguageSwitcher();
+}
+
+// 更新所有文本
+function updateAllTexts() {
+  const t = translations[currentLanguage];
+  
+  // 更新頁面標題
+  document.title = t.title;
+  
+  // 更新標題區域
+  const headerTitle = document.querySelector('.header h1');
+  if (headerTitle) headerTitle.textContent = t.headerTitle;
+  
+  const headerSubtitle = document.querySelector('.header .subtitle');
+  if (headerSubtitle) headerSubtitle.textContent = t.headerSubtitle;
+  
+  // 更新表單標籤
+  const countLabel = document.querySelector('label[for="count"]');
+  if (countLabel) countLabel.textContent = t.countLabel;
+  
+  const codeLengthLabel = document.querySelector('label[for="codeLength"]');
+  if (codeLengthLabel) codeLengthLabel.textContent = t.codeLengthLabel;
+  
+  const compositionTitle = document.querySelector('.composition-title');
+  if (compositionTitle) compositionTitle.textContent = t.compositionTitle;
+  
+  const letterCountLabel = document.querySelector('label[for="letterCount"]');  
+  if (letterCountLabel) letterCountLabel.textContent = t.letterCountLabel;
+  
+  const digitCountLabel = document.querySelector('label[for="digitCount"]');
+  if (digitCountLabel) digitCountLabel.textContent = t.digitCountLabel;
+  
+  const letterCaseLabel = document.querySelector('label[for="letterCase"]');
+  if (letterCaseLabel) letterCaseLabel.textContent = t.letterCaseLabel;
+  
+  const prefixLabel = document.querySelector('label[for="prefix"]');
+  if (prefixLabel) prefixLabel.textContent = t.prefixLabel;
+  
+  const suffixLabel = document.querySelector('label[for="suffix"]');
+  if (suffixLabel) suffixLabel.textContent = t.suffixLabel;
+  
+  const formatPreviewTitle = document.querySelector('.preview-title');
+  if (formatPreviewTitle) formatPreviewTitle.textContent = t.formatPreviewTitle;
+  
+  const compositionNote = document.querySelector('.composition-note');
+  if (compositionNote) compositionNote.textContent = t.compositionNote;
+  
+  const caseNote = document.querySelector('.case-note');
+  if (caseNote) caseNote.textContent = t.caseNote;
+  
+  // 更新按鈕
+  const generateBtnText = document.querySelector('.btn-text');
+  if (generateBtnText) generateBtnText.textContent = t.generateBtn;
+  
+  const downloadBtn = document.getElementById('downloadBtn');
+  if (downloadBtn) downloadBtn.textContent = t.downloadBtn;
+  
+  const restartBtn = document.getElementById('restartBtn');
+  if (restartBtn) restartBtn.textContent = t.restartBtn;
+  
+  // 更新進度相關
+  const progressTitle = document.querySelector('.progress-title');
+  if (progressTitle) progressTitle.textContent = t.progressTitle;
+  
+  // 更新結果標題 (如果存在)
+  const resultsTitle = document.querySelector('.results-title');
+  if (resultsTitle && resultsTitle.textContent === translations.zh.resultsTitle) {
+    resultsTitle.textContent = t.resultsTitle;
+  }
+  
+  // 更新頁尾
+  const footerText = document.querySelector('.footer p');
+  if (footerText) {
+    const currentYear = new Date().getFullYear();
+    footerText.innerHTML = `&copy; <span id="currentYear">${currentYear}</span> ${t.footerText} <a href="https://streetvoice.com" target="_blank">StreetVoice</a>`;
+  }
+  
+  const footerNote = document.querySelector('.footer-note');
+  if (footerNote) footerNote.textContent = t.footerNote;
+}
+
+// 更新語言切換器狀態
+function updateLanguageSwitcher() {
+  const langOptions = document.querySelectorAll('.lang-option');
+  langOptions.forEach(option => {
+    const lang = option.getAttribute('data-lang');
+    option.classList.toggle('active', lang === currentLanguage);
+  });
+}
+
+// 初始化語言系統
+function initializeLanguage() {
+  // 從 localStorage 讀取保存的語言設定
+  const savedLanguage = localStorage.getItem('language') || 'zh';
+  switchLanguage(savedLanguage);
+}
+
 // DOM 元素
 const form = document.getElementById('generatorForm');
 const generateBtn = document.getElementById('generateBtn');
@@ -167,6 +379,12 @@ function displayResults(codes, totalTime) {
 
     if (remaining > 0) {
         codesContainer.innerHTML += `<div class="code-item" style="color: #888; font-style: italic;">... 還有 ${remaining.toLocaleString()} 個專屬碼（點擊下載查看完整清單）</div>`;
+    }
+
+    // 隱藏表單區塊
+    const formSection = document.querySelector('.form-section');
+    if (formSection) {
+        formSection.style.display = 'none';
     }
 
     resultsSection.classList.add('show');
@@ -342,7 +560,9 @@ function showAlert(message, type) {
     alert.className = `alert alert-${type}`;
     alert.textContent = message;
 
-    form.parentNode.insertBefore(alert, form);
+    // 使用專用的 alert 容器
+    const alertContainer = document.getElementById('alertContainer');
+    alertContainer.appendChild(alert);
 
     // 3秒後自動移除
     setTimeout(() => {
@@ -702,8 +922,24 @@ const privacyTexts = [
     "伺服器：我哪有看到專屬碼？蛤？"
 ];
 
-// 動態顯示當前年份
+// 語言切換事件監聽器
 document.addEventListener('DOMContentLoaded', function() {
+    // 初始化語言系統
+    initializeLanguage();
+    
+    // 語言切換按鈕事件
+    const languageSwitch = document.getElementById('languageSwitch');
+    if (languageSwitch) {
+        languageSwitch.addEventListener('click', function(e) {
+            if (e.target.classList.contains('lang-option')) {
+                const selectedLang = e.target.getAttribute('data-lang');
+                if (selectedLang !== currentLanguage) {
+                    switchLanguage(selectedLang);
+                }
+            }
+        });
+    }
+    
     const currentYear = new Date().getFullYear();
     const yearElement = document.getElementById('currentYear');
     if (yearElement) {
@@ -716,11 +952,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const random = Math.random();
         let selectedText;
         
-        if (random < 0.5) {
-            // 50% 機率顯示原文
+        if (random < 0.7) {
+            // 70% 機率顯示原文
             selectedText = privacyTexts[0];
         } else {
-            // 50% 機率隨機選擇其他五款
+            // 30% 機率隨機選擇其他五款
             const funnyTexts = privacyTexts.slice(1);
             selectedText = funnyTexts[Math.floor(Math.random() * funnyTexts.length)];
         }
