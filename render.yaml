@@ -4,8 +4,8 @@ services:
     env: python
     region: singapore
     plan: free
-    buildCommand: "./deploy.sh"
-    startCommand: "python3 app.py"
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT app:app"
     envVars:
       - key: FLASK_ENV
         value: production
