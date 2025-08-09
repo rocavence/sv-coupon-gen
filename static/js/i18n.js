@@ -121,8 +121,8 @@ const translations = {
     
     // 主題切換
     themeToggle: {
-      dark: "🌙 深色模式",
-      light: "☀️ 淺色模式"
+      dark: "🌚 深色模式",
+      light: "🌝 淺色模式"
     },
     
     // 頁尾
@@ -249,8 +249,8 @@ const translations = {
     
     // Theme toggle  
     themeToggle: {
-      dark: "🌙 Dark Mode",
-      light: "☀️ Light Mode"
+      dark: "🌚 Dark Mode",
+      light: "🌝 Light Mode"
     },
     
     // Footer

@@ -32,26 +32,11 @@
     <script src="{{ url_for('static', filename='js/download-effects.js') }}"></script>
 </head>
 <body>
-    <div class="top-controls">
-        <div class="theme-toggle" id="themeToggle">🌙 深色模式</div>
-        <div class="language-switch" id="languageSwitch">
-            <span class="lang-option active" data-lang="zh">中文</span>
-            <span class="lang-option" data-lang="en">ENG</span>
-        </div>
-    </div>
     <div class="container">
         <div class="header">
             <div class="header-content">
                 <h1>專屬碼產生器</h1>
                 <div class="subtitle">快速產生大量專屬碼</div>
-            </div>
-        </div>
-
-        <div class="notice">
-            <div class="notice-icon">🔐</div>
-            <div class="notice-text" id="privacyText">
-                請放心！我們不會儲存你產生的專屬碼，<br>
-                所有專屬碼都在本地產生且只存在於你的瀏覽器中。
             </div>
         </div>
 
@@ -173,9 +158,25 @@
             </div>
         </div>
 
+        <div class="notice">
+            <div class="notice-icon">🔐</div>
+            <div class="notice-text" id="privacyText">
+                請放心！我們不會儲存你產生的專屬碼，<br>
+                所有專屬碼都在本地產生且只存在於你的瀏覽器中。
+            </div>
+        </div>
+
         <div class="footer">
             <p>&copy; <span id="currentYear">2024</span> 專屬碼產生器 · powered by <a href="https://streetvoice.com" target="_blank">StreetVoice</a></p>
             <p class="footer-note">所有功能均在瀏覽器端執行，確保您的資料安全。</p>
+        </div>
+    </div>
+
+    <div class="bottom-controls">
+        <div class="theme-toggle" id="themeToggle">🌚 深色模式</div>
+        <div class="language-switch" id="languageSwitch">
+            <span class="lang-option active" data-lang="zh">中文</span>
+            <span class="lang-option" data-lang="en">ENG</span>
         </div>
     </div>
 

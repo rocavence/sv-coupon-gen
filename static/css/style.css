@@ -680,7 +680,6 @@ body.light-theme .alert-error {
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     padding: 20px;
-    margin-bottom: 30px;
     text-align: center;
 }
 
@@ -695,10 +694,10 @@ body.light-theme .alert-error {
     line-height: 1.5;
 }
 
-/* 右上角控制區域 */
-.top-controls {
+/* 底部靠右控制區域 */
+.bottom-controls {
     position: fixed;
-    top: 20px;
+    bottom: 20px;
     right: 20px;
     display: flex;
     gap: 15px;
