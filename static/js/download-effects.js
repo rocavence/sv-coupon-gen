@@ -8,6 +8,8 @@ class DownloadButtonEffects {
         this.downloadPressStartTime = 0;
         this.clickCount = 0;
         this.isExploded = false;
+        this.isReappeared = false; // 是否已重新出現
+        this.escapeMode = false; // 是否啟動逃跑模式
         this.initialized = false;
         this.audio = null;
         this.hasPlayedAudio = false;
@@ -201,26 +203,38 @@ class DownloadButtonEffects {
         const dy = e.clientY - centerY;
 
         const distance = Math.sqrt(dx * dx + dy * dy);
-        const radius = this.isExploded ? 200 : 120; // 爆炸後感應範圍也增大
+        
+        // 判斷感應範圍和行為模式
+        const radius = this.escapeMode ? 200 : 120;
         
         if (distance < radius) {
             let offsetX, offsetY;
 
-            if (this.isExploded) {
-                // 增加逃跑次數
-                this.escapeCount++;
+            // 檢查是否為爆炸後首次靠近（啟動逃跑模式）
+            if (this.isReappeared && !this.escapeMode) {
+                this.escapeMode = true; // 啟動逃跑模式
                 
-                // 音效播放邏輯：滑鼠接近第一次 + 每逃跑5次
-                const shouldPlayAudio = (!this.hasPlayedAudio) || (this.escapeCount % 5 === 0);
-                if (shouldPlayAudio && this.audio) {
+                // 播放第一次音效
+                if (this.audio && !this.hasPlayedAudio) {
                     this.hasPlayedAudio = true;
                     this.audio.currentTime = 0;
                     this.audio.play().catch(e => console.log('Audio play failed:', e));
                 }
+            }
 
-                // 爆炸後：逃跑到畫面任意位置
-                const escapeMultiplier = 2 + Math.random() * 3; // 隨機逃跑強度
-                const avoidanceRadius = Math.min(window.innerWidth, window.innerHeight) * 0.3; // 基於畫面大小的逃跑半徑
+            if (this.escapeMode) {
+                // 逃跑模式：瘋狂逃跑
+                this.escapeCount++;
+                
+                // 每逃跑5次播放音效
+                if (this.escapeCount % 5 === 0 && this.audio) {
+                    this.audio.currentTime = 0;
+                    this.audio.play().catch(e => console.log('Audio play failed:', e));
+                }
+
+                // 逃跑到畫面任意位置
+                const escapeMultiplier = 2 + Math.random() * 3;
+                const avoidanceRadius = Math.min(window.innerWidth, window.innerHeight) * 0.3;
                 
                 // 計算逃跑方向（遠離滑鼠）
                 const escapeAngle = Math.atan2(-dy, -dx);
@@ -232,19 +246,18 @@ class DownloadButtonEffects {
                 // 確保按鈕移動後仍在畫面內
                 const buttonWidth = rect.width;
                 const buttonHeight = rect.height;
-                const margin = 30; // 邊界邊距
+                const margin = 30;
                 
                 let newX = centerX + offsetX;
                 let newY = centerY + offsetY;
                 
-                // 水平邊界檢查
+                // 邊界檢查
                 if (newX - buttonWidth/2 < margin) {
                     newX = margin + buttonWidth/2;
                 } else if (newX + buttonWidth/2 > window.innerWidth - margin) {
                     newX = window.innerWidth - margin - buttonWidth/2;
                 }
                 
-                // 垂直邊界檢查
                 if (newY - buttonHeight/2 < margin) {
                     newY = margin + buttonHeight/2;
                 } else if (newY + buttonHeight/2 > window.innerHeight - margin) {
@@ -255,9 +268,11 @@ class DownloadButtonEffects {
                 offsetX = newX - centerX;
                 offsetY = newY - centerY;
                 
-                // 添加一些隨機抖動讓逃跑更瘋狂
+                // 添加隨機抖動
                 offsetX += (Math.random() - 0.5) * 50;
                 offsetY += (Math.random() - 0.5) * 50;
+                
+                this.downloadBtn.style.transition = 'transform 0.3s ease-out';
                 
             } else {
                 // 爆炸前：小範圍閃避
@@ -265,15 +280,15 @@ class DownloadButtonEffects {
                 const maxOffset = 20;
                 offsetX = Math.min(maxOffset, dx * factor * 0.5) * -1;
                 offsetY = Math.min(maxOffset, dy * factor * 0.5) * -1;
+                this.downloadBtn.style.transition = 'transform 0.1s ease-out';
             }
 
             this.downloadBtn.style.setProperty('--offset-x', `${offsetX}px`);
             this.downloadBtn.style.setProperty('--offset-y', `${offsetY}px`);
             this.downloadBtn.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-            this.downloadBtn.style.transition = this.isExploded ? 'transform 0.3s ease-out' : 'transform 0.1s ease-out';
         } else {
-            // 只有在未爆炸狀態才回到原位
-            if (!this.isExploded) {
+            // 只有在非逃跑模式才回到原位
+            if (!this.escapeMode) {
                 this.downloadBtn.style.setProperty('--offset-x', `0px`);
                 this.downloadBtn.style.setProperty('--offset-y', `0px`);
                 this.downloadBtn.style.transform = `translate(0px, 0px)`;
@@ -407,23 +422,44 @@ class DownloadButtonEffects {
             animateParticle();
         }
         
-        // 3秒後重置按鈕狀態
+        // 3秒後讓按鈕重新出現在原位
         setTimeout(() => {
-            this.resetExplosion();
+            this.reappearButton();
         }, 3000);
     }
 
-    // 重置爆炸狀態
-    resetExplosion() {
-        this.isExploded = false;
-        this.clickCount = 0;
-        this.hasPlayedAudio = false;
-        this.escapeCount = 0; // 重置逃跑次數
+    // 讓按鈕重新出現在原位（但保持爆炸狀態）
+    reappearButton() {
+        this.isReappeared = true;
         
         if (this.downloadBtn) {
             this.downloadBtn.style.opacity = '1';
             this.downloadBtn.style.pointerEvents = 'auto';
             this.downloadBtn.classList.remove('animate-shake', 'animate-bounce');
+            // 重置位置到原點
+            this.downloadBtn.style.setProperty('--offset-x', '0px');
+            this.downloadBtn.style.setProperty('--offset-y', '0px');
+            this.downloadBtn.style.transform = 'translate(0px, 0px)';
+        }
+    }
+
+    // 重置爆炸狀態
+    resetExplosion() {
+        this.isExploded = false;
+        this.isReappeared = false;
+        this.escapeMode = false;
+        this.clickCount = 0;
+        this.hasPlayedAudio = false;
+        this.escapeCount = 0;
+        
+        if (this.downloadBtn) {
+            this.downloadBtn.style.opacity = '1';
+            this.downloadBtn.style.pointerEvents = 'auto';
+            this.downloadBtn.classList.remove('animate-shake', 'animate-bounce');
+            // 重置位置到原點
+            this.downloadBtn.style.setProperty('--offset-x', '0px');
+            this.downloadBtn.style.setProperty('--offset-y', '0px');
+            this.downloadBtn.style.transform = 'translate(0px, 0px)';
         }
     }
 
